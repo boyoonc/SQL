@@ -234,13 +234,58 @@ JOIN
   ON
     roles.movie_id = baconMovieID
   WHERE
-    baconMovieName = 'Apollo 13' and actors.id != 22591
+    -- baconMovieName = 'Apollo 13' and actors.id != 22591
+    actors.id != 22591
   ORDER BY
-    2 DESC
+    3 DESC
     ;
 
+-- oh no i forgot about the drama genre!
+-----------
+--ta's answer
 
+SELECT *, a.first_name || " " || a.last_name AS full_name
+FROM actors AS a
+  INNER JOIN roles AS r ON r.actor_id = a.id
+  INNER JOIN movies AS m ON r.movie_id = m.id
+  INNER JOIN movies_genres AS mg
+    ON mg.movie_id = m.id
+    AND mg.genre = 'Drama'
+WHERE m.id IN (
+  SELECT m2.id
+  FROM movies AS m2
+    INNER JOIN roles AS r2 ON r2.movie_id = m2.id
+    INNER JOIN actors AS a2
+      ON r2.actor_id = a2.id
+      AND a2.first_name = 'Kevin'
+      AND a2.last_name = 'Bacon'
+)
+AND full_name != 'Kevin Bacon'
+and m.name = 'Apollo 13'
+ORDER BY a.last_name ASC;
   
+SELECT *, a.first_name || " " || a.last_name AS full_name
+FROM actors AS a
+  INNER JOIN roles AS r ON r.actor_id = a.id
+  INNER JOIN movies AS m ON r.movie_id = m.id
+  INNER JOIN movies_genres AS mg
+    ON mg.movie_id = m.id
+    AND mg.genre = 'Drama'
+WHERE m.id IN (
+    SELECT 
+      movies.id baconMovieID
+    FROM
+      movies
+    JOIN
+      roles
+    ON
+      movies.id = roles.movie_id
+    WHERE 
+      roles.actor_id = 22591
+)
+-- AND full_name != 'Kevin Bacon'
+and m.name = 'Apollo 13'
+ORDER BY a.last_name ASC;
 
 
 
