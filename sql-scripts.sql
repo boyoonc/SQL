@@ -108,7 +108,7 @@ LIMIT
   100;
 
 -----------
-first, i want to know how many genres there are
+-- first, i want to know how many genres there are
 SELECT
   count(movies_genres.genre),
   movies_genres.genre
@@ -144,7 +144,7 @@ ORDER BY
 
 -----------
 
- director name, the movie name, and the year
+ -- director name, the movie name, and the year
  SELECT
   directors.first_name,
   directors.last_name,
@@ -173,15 +173,15 @@ ORDER BY
 
 -----------
 
-first find movies kevin bacon has been in
-then get all actors in those movies
-and find a way to make it unique
-and take out kevin bacon
+-- first find movies kevin bacon has been in
+-- then get all actors in those movies
+-- and find a way to make it unique
+-- and take out kevin bacon
 
-feels like i might want to do a new kind of join
+-- feels like i might want to do a new kind of join
 
-so if i were to use a left join
-join movies to actors
+-- so if i were to use a left join
+-- join movies to actors
 
 SELECT
   id
@@ -190,7 +190,7 @@ FROM
 WHERE
   actors.first_name = 'Kevin' and actors.last_name = 'Bacon';
 
-i get 22591
+-- i get 22591
 
 --subquery
   --movies where bacon starred
@@ -288,8 +288,109 @@ and m.name = 'Apollo 13'
 ORDER BY a.last_name ASC;
 
 
+----------------
+SELECT actors.first_name, actors.last_name
+FROM (SELECT
+roles.actor_id
+FROM movies
+JOIN roles
+ON roles.movie_id = movies.id
+WHERE movies.year >2000
+INTERSECT
+SELECT
+roles.actor_id
+FROM movies
+JOIN roles
+ON roles.movie_id = movies.id
+WHERE movies.year <1900) a
+JOIN actors
+ON a.actor_id = actors.id
+;
+----------------
+--actors that had five or more distinct (cough cough) roles in the same movie.
+--returns the actors' names, the movie name, and the number of distinct roles that they played in that movie 
+
+-- need actors' role per movie
+-- usually should be 1
+-- so then in roles table, how many rows are there with the same values
+
+SELECT
+  -- count(roles.actor_id) c
+  count(DISTINCT roles.role) c, actors.first_name, actors.last_name, movies.name
+FROM
+  roles
+JOIN actors ON actors.id = roles.actor_id
+JOIN
+  movies
+ON
+  roles.movie_id = movies.id
+WHERE movies.year > 1990
+-- AND c > 4 -- can't do this with aggregate method
+GROUP BY
+  roles.movie_id, roles.actor_id
+HAVING c > 4;
+
+-----------------
+-- For each year, count the number of movies in that year that had only female actors
+-- select movies with males
+-- select with no males
+-- select with females
+-- group!
+
+-- small chunk:
+(SELECT
+  movies.id
+FROM
+  movies
+JOIN
+  roles
+ON
+  movies.id = roles.movie_id
+JOIN
+  actors
+ON actors.id = roles.actor_id
+WHERE
+  actors.gender = M)
 
 
+-- full answer:
+SELECT
+  movies.year, count(movies.id)
+FROM
+  movies
+where
+  movies.id not in(
+    SELECT
+      movies.id
+    FROM
+      movies
+    JOIN
+      roles
+    ON
+      movies.id = roles.movie_id
+    JOIN
+      actors
+    ON actors.id = roles.actor_id
+    WHERE
+      actors.gender = 'M'
+    )
+and movies.id in(
+    SELECT
+      movies.id
+    FROM
+      movies
+    JOIN
+      roles
+    ON
+      movies.id = roles.movie_id
+    JOIN
+      actors
+    ON actors.id = roles.actor_id
+    WHERE
+      actors.gender = 'F'
+)
+GROUP BY
+  movies.year;
 
 
 
